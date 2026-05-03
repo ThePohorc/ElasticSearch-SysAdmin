@@ -1,5 +1,6 @@
 using ElasticHelpers.SysAdmin.Cmd.Commands;
 using ElasticHelpers.SysAdmin.Cmd.Infrastructure;
+
 using ElasticHelpers.SysAdmin.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,9 @@ app.Configure(cfg =>
 {
     cfg.AddCommand<PingCommand>("ping")
        .WithDescription("Tests if the Elasticsearch cluster is reachable.");
+
+    cfg.AddCommand<GetIndexesSizeInfoCommand>("get-indexes-size-info")
+       .WithDescription("Lists all indices with health, status, doc count and store size.");
 });
 
 return app.Run(args);
