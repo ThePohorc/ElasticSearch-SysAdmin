@@ -32,6 +32,13 @@ dotnet add ElasticHelpers.SysAdmin.Core package <PackageName>
 dotnet restore ElasticHelpers.SysAdmin.slnx
 ```
 
+## Dependency injection
+
+All DI uses **`Microsoft.Extensions.DependencyInjection`**. The container is built once in `Program.cs` (the composition root) and handed to Spectre via `TypeRegistrar`.
+
+- **Core** references only `Microsoft.Extensions.DependencyInjection.Abstractions` (the lightweight interfaces package). Each feature area in Core exposes a `static ServiceCollectionExtensions` class with an `AddXxx(this IServiceCollection)` extension method that registers its own services. Core never instantiates `ServiceCollection` itself.
+- **Cmd** references the full `Microsoft.Extensions.DependencyInjection` package, creates the `ServiceCollection`, calls the Core extension methods, then passes the registrar to `CommandApp`.
+
 ## CLI framework
 
 The Cmd project uses **[Spectre.Console.Cli](https://spectreconsole.net/cli/getting-started)** for all command parsing. Every CLI verb is a `Command<TSettings>` (or `AsyncCommand<TSettings>`), with parameters and options declared as properties on a `CommandSettings` subclass using `[CommandArgument]` and `[CommandOption]` attributes. Register commands in `Program.cs` via `CommandApp`. Do not use `System.CommandLine` or manual `args[]` parsing.

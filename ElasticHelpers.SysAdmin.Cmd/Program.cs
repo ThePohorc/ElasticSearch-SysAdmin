@@ -14,12 +14,11 @@ IConfiguration config = new ConfigurationBuilder()
 
 var services = new ServiceCollection();
 
-services.AddSingleton(new ElasticsearchSettings
+services.AddElasticsearchCore(new ElasticsearchSettings
 {
     Url = config["Elasticsearch:Url"] ?? throw new InvalidOperationException("Elasticsearch:Url is required"),
     ApiKey = config["Elasticsearch:ApiKey"] ?? string.Empty,
 });
-services.AddSingleton<IElasticsearchService, ElasticsearchService>();
 
 var app = new CommandApp(new TypeRegistrar(services));
 
