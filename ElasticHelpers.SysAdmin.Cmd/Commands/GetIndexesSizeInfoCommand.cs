@@ -40,13 +40,14 @@ public sealed class GetIndexesSizeInfoCommand : AsyncCommand<GetIndexesSizeInfoC
     {
         var table = new Table()
             .Border(TableBorder.Rounded)
+            .AddColumn(new TableColumn("#").RightAligned())
             .AddColumn("Health")
             .AddColumn("Status")
             .AddColumn("Index")
             .AddColumn(new TableColumn("Docs Count").RightAligned())
             .AddColumn(new TableColumn("Store Size").RightAligned());
 
-        foreach (var idx in indices)
+        foreach (var (idx, i) in indices.Select((x, i) => (x, i + 1)))
         {
             var healthMarkup = idx.Health switch
             {
@@ -56,7 +57,7 @@ public sealed class GetIndexesSizeInfoCommand : AsyncCommand<GetIndexesSizeInfoC
                 _        => idx.Health
             };
 
-            table.AddRow(healthMarkup, idx.Status, idx.Index, idx.DocsCount, idx.StoreSize);
+            table.AddRow(i.ToString(), healthMarkup, idx.Status, idx.Index, idx.DocsCount, idx.StoreSize);
         }
 
         AnsiConsole.Write(table);
