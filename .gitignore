@@ -1,6 +1,7 @@
 # Build output
 bin/
 obj/
+BUILDED/
 
 # User secrets (stored outside repo, but just in case)
 secrets.json

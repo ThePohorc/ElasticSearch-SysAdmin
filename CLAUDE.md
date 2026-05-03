@@ -32,6 +32,22 @@ dotnet add ElasticHelpers.SysAdmin.Core package <PackageName>
 dotnet restore ElasticHelpers.SysAdmin.slnx
 ```
 
+## Publishing
+
+```powershell
+# Restore for the win-x64 RID (only needed once, or after adding new packages)
+dotnet restore ElasticHelpers.SysAdmin.Cmd -r win-x64 --ignore-failed-sources
+
+# Publish — outputs a single self-contained exe to ./BUILDED/
+dotnet publish ElasticHelpers.SysAdmin.Cmd -p:PublishProfile=Release --no-restore
+```
+
+The Release publish profile (`ElasticHelpers.SysAdmin.Cmd/Properties/PublishProfiles/Release.pubxml`) is configured for:
+- **Target**: `win-x64`, self-contained (no .NET runtime required on the target machine)
+- **Single file**: enabled with compression — output is one `.exe` plus `appsettings.json`
+- **Debug symbols**: embedded into the exe via `Directory.Build.props` (`DebugType=embedded` for all Release builds), so no sidecar `.pdb` files are produced
+- **Output**: `./BUILDED/` at the solution root (excluded from git)
+
 ## Dependency injection
 
 All DI uses **`Microsoft.Extensions.DependencyInjection`**. The container is built once in `Program.cs` (the composition root) and handed to Spectre via `TypeRegistrar`.
