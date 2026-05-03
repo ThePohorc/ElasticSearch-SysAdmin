@@ -32,6 +32,10 @@ dotnet add ElasticHelpers.SysAdmin.Core package <PackageName>
 dotnet restore ElasticHelpers.SysAdmin.slnx
 ```
 
+## CLI framework
+
+The Cmd project uses **[Spectre.Console.Cli](https://spectreconsole.net/cli/getting-started)** for all command parsing. Every CLI verb is a `Command<TSettings>` (or `AsyncCommand<TSettings>`), with parameters and options declared as properties on a `CommandSettings` subclass using `[CommandArgument]` and `[CommandOption]` attributes. Register commands in `Program.cs` via `CommandApp`. Do not use `System.CommandLine` or manual `args[]` parsing.
+
 ## Secrets management
 
 `appsettings.json` contains placeholder values for `Elasticsearch:Password` and `Elasticsearch:ApiKey`. **Never populate these fields in the file and never commit credentials to git.**

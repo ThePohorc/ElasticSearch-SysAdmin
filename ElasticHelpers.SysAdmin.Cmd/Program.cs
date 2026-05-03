@@ -1,4 +1,9 @@
+using ElasticHelpers.SysAdmin.Cmd.Commands;
+using ElasticHelpers.SysAdmin.Cmd.Infrastructure;
+using ElasticHelpers.SysAdmin.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console.Cli;
 
 IConfiguration config = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -7,5 +12,21 @@ IConfiguration config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var esUrl = config["Elasticsearch:Url"];
-Console.WriteLine($"Connecting to Elasticsearch at: {esUrl}");
+var services = new ServiceCollection();
+
+services.AddSingleton(new ElasticsearchSettings
+{
+    Url = config["Elasticsearch:Url"] ?? throw new InvalidOperationException("Elasticsearch:Url is required"),
+    ApiKey = config["Elasticsearch:ApiKey"] ?? string.Empty,
+});
+services.AddSingleton<IElasticsearchService, ElasticsearchService>();
+
+var app = new CommandApp(new TypeRegistrar(services));
+
+app.Configure(cfg =>
+{
+    cfg.AddCommand<PingCommand>("ping")
+       .WithDescription("Tests if the Elasticsearch cluster is reachable.");
+});
+
+return app.Run(args);
