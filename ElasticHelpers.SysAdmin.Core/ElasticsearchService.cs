@@ -39,7 +39,7 @@ public class ElasticsearchService : IElasticsearchService
     public async Task<IReadOnlyList<IndexSizeInfo>> GetIndexesSizeInfoAsync()
     {
         var url = $"{_baseUrl}/_cat/indices?format=json" +
-                  "&h=health,status,index,docs.count,store.size&s=health:desc";
+                  "&h=health,status,index,pri,rep,docs.count,store.size&s=health:desc";
 
         var json = await _http.GetStringAsync(url);
 
@@ -51,6 +51,8 @@ public class ElasticsearchService : IElasticsearchService
                 r.Health ?? "",
                 r.Status ?? "",
                 r.Index ?? "",
+                r.Pri ?? "",
+                r.Rep ?? "",
                 r.DocsCount ?? "",
                 r.StoreSize ?? ""))
             .ToList();
@@ -60,6 +62,8 @@ public class ElasticsearchService : IElasticsearchService
         [property: JsonPropertyName("health")]     string? Health,
         [property: JsonPropertyName("status")]     string? Status,
         [property: JsonPropertyName("index")]      string? Index,
+        [property: JsonPropertyName("pri")]        string? Pri,
+        [property: JsonPropertyName("rep")]        string? Rep,
         [property: JsonPropertyName("docs.count")] string? DocsCount,
         [property: JsonPropertyName("store.size")] string? StoreSize
     );

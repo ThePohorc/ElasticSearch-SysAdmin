@@ -44,6 +44,8 @@ public sealed class GetIndexesSizeInfoCommand : AsyncCommand<GetIndexesSizeInfoC
             .AddColumn("Health")
             .AddColumn("Status")
             .AddColumn("Index")
+            .AddColumn(new TableColumn("Pri").RightAligned())
+            .AddColumn(new TableColumn("Rep").RightAligned())
             .AddColumn(new TableColumn("Docs Count").RightAligned())
             .AddColumn(new TableColumn("Store Size").RightAligned());
 
@@ -57,7 +59,7 @@ public sealed class GetIndexesSizeInfoCommand : AsyncCommand<GetIndexesSizeInfoC
                 _        => idx.Health
             };
 
-            table.AddRow(i.ToString(), healthMarkup, idx.Status, idx.Index, idx.DocsCount, idx.StoreSize);
+            table.AddRow(i.ToString(), healthMarkup, idx.Status, idx.Index, idx.Pri, idx.Rep, idx.DocsCount, idx.StoreSize);
         }
 
         AnsiConsole.Write(table);
@@ -69,10 +71,10 @@ public sealed class GetIndexesSizeInfoCommand : AsyncCommand<GetIndexesSizeInfoC
         CancellationToken cancellationToken)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("health,status,index,docs.count,store.size");
+        csv.AppendLine("health,status,index,pri,rep,docs.count,store.size");
 
         foreach (var idx in indices)
-            csv.AppendLine($"{idx.Health},{idx.Status},{EscapeCsv(idx.Index)},{idx.DocsCount},{idx.StoreSize}");
+            csv.AppendLine($"{idx.Health},{idx.Status},{EscapeCsv(idx.Index)},{idx.Pri},{idx.Rep},{idx.DocsCount},{idx.StoreSize}");
 
         await File.WriteAllTextAsync(path, csv.ToString(), cancellationToken);
         AnsiConsole.MarkupLine($"[grey]Exported {indices.Count} rows to {path}[/]");
