@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ElasticHelpers.SysAdmin.Core\ElasticHelpers.SysAdmin.Core.csproj" />
+  <Project Path="ElasticHelpers.SysAdmin.Cmd\ElasticHelpers.SysAdmin.Cmd.csproj" />
+</Solution>
