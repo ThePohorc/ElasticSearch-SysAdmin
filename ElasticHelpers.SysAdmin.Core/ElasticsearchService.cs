@@ -58,6 +58,67 @@ public class ElasticsearchService : IElasticsearchService
             .ToList();
     }
 
+    public async Task<IReadOnlyList<IndexSizeInfo>> GetIndexInfoAsync(string indexName)
+    {
+        var indexNames = await ResolveUnderlyingIndicesAsync(indexName);
+
+        if (indexNames.Count == 0)
+            return [];
+
+        var joined = string.Join(",", indexNames);
+        var url = $"{_baseUrl}/_cat/indices/{joined}?format=json" +
+                  "&h=health,status,index,pri,rep,docs.count,store.size&s=index:asc";
+
+        var json = await _http.GetStringAsync(url);
+        var records = JsonSerializer.Deserialize<List<CatIndexRecord>>(json, JsonOptions) ?? [];
+
+        return records
+            .Select(r => new IndexSizeInfo(
+                r.Health ?? "",
+                r.Status ?? "",
+                r.Index ?? "",
+                r.Pri ?? "",
+                r.Rep ?? "",
+                r.DocsCount ?? "",
+                r.StoreSize ?? ""))
+            .ToList();
+    }
+
+    private async Task<List<string>> ResolveUnderlyingIndicesAsync(string indexName)
+    {
+        // Try alias first
+        var aliasResponse = await _http.GetAsync($"{_baseUrl}/_alias/{indexName}");
+        if (aliasResponse.IsSuccessStatusCode)
+        {
+            var json = await aliasResponse.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var names = doc.RootElement.EnumerateObject()
+                .Select(p => p.Name)
+                .OrderBy(n => n)
+                .ToList();
+            if (names.Count > 0)
+                return names;
+        }
+
+        // Fall back to data stream
+        var dsResponse = await _http.GetAsync($"{_baseUrl}/_data_stream/{indexName}");
+        if (dsResponse.IsSuccessStatusCode)
+        {
+            var json = await dsResponse.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement
+                .GetProperty("data_streams")[0]
+                .GetProperty("indices")
+                .EnumerateArray()
+                .Select(i => i.GetProperty("index_name").GetString() ?? "")
+                .Where(n => n.Length > 0)
+                .OrderBy(n => n)
+                .ToList();
+        }
+
+        throw new InvalidOperationException($"No alias or data stream found for '{indexName}'.");
+    }
+
     private sealed record CatIndexRecord(
         [property: JsonPropertyName("health")]     string? Health,
         [property: JsonPropertyName("status")]     string? Status,

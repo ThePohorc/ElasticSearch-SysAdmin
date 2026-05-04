@@ -31,6 +31,9 @@ app.Configure(cfg =>
     cfg.AddCommand<GetIndexesSizeInfoCommand>("get-indexes-size-info")
        .WithDescription("Lists all indices with health, status, doc count and store size.");
 
+    cfg.AddCommand<IndexInfoCommand>("index-info")
+       .WithDescription("Lists all rolled-over underlying indices for a given alias or data stream.");
+
     cfg.AddCommand<InfoCommand>("info")
        .WithDescription("Displays the build date of this executable.");
 });
